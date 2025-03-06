@@ -8,7 +8,7 @@ return (
   <div className="App">
     <header className="App-header">
       <img src={logohorario} alt="Controle Horas" width="150" />
-      <h1>ControleHoras</h1>
+      <ControleHoras />
     </header>
   </div>
 );
