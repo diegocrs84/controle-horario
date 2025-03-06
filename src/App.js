@@ -1,5 +1,4 @@
 import React from "react";
-//import ControleHoras from "./ControleHoras";
 import ControleHoras from "./Controlehoras";
 import "./ControleHoras.css";
 
