@@ -1,6 +1,6 @@
 import React from "react";
 import ControleHoras from "./Controlehoras";
-import logohorario from "./images";
+import logohorario from "./logohorario.jpg";
 import "./ControleHoras.css";
 
 function App() {
