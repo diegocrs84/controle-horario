@@ -79,10 +79,7 @@ const Controlehoras = () => {
           <label>Saída Real:</label>
           <input type="time" value={saidaReal} onChange={(e) => setSaidaReal(e.target.value)}onBlur={calcularSaida} />
         </div>
-      </div>
-  
-      <button onClick={calcularSaida}>Calcular Saída</button>
-  
+      </div>  
       <h3>Horas Previstas de Trabalho: {horasPrevistas}</h3>
       <h3>Horas Reais de Trabalho: {horasReais}</h3>
     </div>
