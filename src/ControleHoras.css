@@ -42,4 +42,14 @@
     flex-direction: column;
     align-items: center;
   }
+
+  body.dark {
+    background: #121212;
+    color: #ffffff;
+  }
+
+  body.dark button {
+    background: #fff;
+    color: #333;
+  }
   
