@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const cors = require('cors');
 require('dotenv').config();
 
 // Conexão com MongoDB
@@ -10,9 +9,17 @@ async function connectToDatabase() {
         return cachedDb;
     }
 
-    const db = await mongoose.connect(process.env.MONGODB_URI);
-    cachedDb = db;
-    return db;
+    try {
+        const db = await mongoose.connect(process.env.MONGODB_URI, {
+            serverSelectionTimeoutMS: 5000
+        });
+        console.log('Conectado ao MongoDB com sucesso');
+        cachedDb = db;
+        return db;
+    } catch (error) {
+        console.error('Erro ao conectar ao MongoDB:', error);
+        throw new Error('Não foi possível conectar ao banco de dados');
+    }
 }
 
 // Schema do Registro
@@ -36,15 +43,23 @@ try {
 
 // Handler para as requisições
 module.exports = async (req, res) => {
-    // Habilitar CORS
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-    res.setHeader(
-        'Access-Control-Allow-Headers',
-        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-    );
+    // Configurar CORS
+    const allowedOrigins = [
+        'https://seu-projeto.vercel.app',
+        'http://localhost:3000',
+        'http://localhost:3001'
+    ];
+    
+    const origin = req.headers.origin;
+    if (allowedOrigins.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+    }
 
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+    // Responder imediatamente para requisições OPTIONS
     if (req.method === 'OPTIONS') {
         res.status(200).end();
         return;
@@ -55,20 +70,24 @@ module.exports = async (req, res) => {
 
         if (req.method === 'GET') {
             const registros = await Registro.find().sort({ data: -1 });
-            res.json(registros);
-            return;
+            return res.status(200).json(registros);
         }
 
         if (req.method === 'POST') {
+            if (!req.body) {
+                return res.status(400).json({ message: 'Dados do registro não fornecidos' });
+            }
             const registro = new Registro(req.body);
             await registro.save();
-            res.status(201).json(registro);
-            return;
+            return res.status(201).json(registro);
         }
 
-        res.status(405).json({ message: 'Método não permitido' });
+        return res.status(405).json({ message: 'Método não permitido' });
     } catch (error) {
         console.error('Erro na API:', error);
-        res.status(500).json({ message: error.message });
+        return res.status(500).json({ 
+            message: 'Erro interno do servidor',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
     }
 }; 

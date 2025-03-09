@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 
-const API_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://seu-projeto.vercel.app/api'
-  : 'http://localhost:3001/api';
+// Obter a URL base do ambiente atual
+const BASE_URL = process.env.NODE_ENV === 'production' 
+  ? window.location.origin 
+  : 'http://localhost:3000';
+
+const API_URL = `${BASE_URL}/api`;
 
 const Controlehoras = () => {
   const [entrada, setEntrada] = useState("");
@@ -21,10 +24,18 @@ const Controlehoras = () => {
 
   const carregarRegistros = async () => {
     try {
-      const response = await fetch(`${API_URL}/registros`);
+      const response = await fetch(`${API_URL}/registros`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
+      
       if (!response.ok) {
         throw new Error('Erro ao carregar registros');
       }
+      
       const data = await response.json();
       setRegistros(data);
     } catch (error) {
@@ -115,6 +126,7 @@ const Controlehoras = () => {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(registro),
       });
 
