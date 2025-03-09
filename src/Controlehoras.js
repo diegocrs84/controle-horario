@@ -1,4 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+
+const API_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://seu-projeto.vercel.app/api'
+  : 'http://localhost:3001/api';
 
 const Controlehoras = () => {
   const [entrada, setEntrada] = useState("");
@@ -17,7 +21,7 @@ const Controlehoras = () => {
 
   const carregarRegistros = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/registros');
+      const response = await fetch(`${API_URL}/registros`);
       if (!response.ok) {
         throw new Error('Erro ao carregar registros');
       }
@@ -25,11 +29,11 @@ const Controlehoras = () => {
       setRegistros(data);
     } catch (error) {
       console.error('Erro ao carregar registros:', error);
-      setMensagem({ texto: "Erro ao carregar registros. Verifique se o servidor está rodando.", tipo: "erro" });
+      setMensagem({ texto: "Erro ao carregar registros. Verifique sua conexão.", tipo: "erro" });
     }
   };
 
-  const calcularHoras = (hora1, hora2) => {
+  const calcularHoras = useCallback((hora1, hora2) => {
     if (!hora1 || !hora2) return 0;
     
     const [h1, m1] = hora1.split(':').map(Number);
@@ -37,9 +41,9 @@ const Controlehoras = () => {
     
     const totalMinutos = (h2 * 60 + m2) - (h1 * 60 + m1);
     return totalMinutos / 60;
-  };
+  }, []);
 
-  const calcularSaida = () => {
+  const calcularSaida = useCallback(() => {
     if (entrada && inicioAlmoco && fimAlmoco) {
       // Calcula o tempo antes do almoço
       const horasAnteAlmoco = calcularHoras(entrada, inicioAlmoco);
@@ -66,11 +70,11 @@ const Controlehoras = () => {
         setHorasReais(horasReaisCalc.toFixed(2));
       }
     }
-  };
+  }, [entrada, inicioAlmoco, fimAlmoco, saidaReal, calcularHoras]);
 
   useEffect(() => {
     calcularSaida();
-  }, [entrada, inicioAlmoco, fimAlmoco, saidaReal]);
+  }, [calcularSaida]);
 
   const validarCampos = () => {
     if (!entrada) {
@@ -106,7 +110,7 @@ const Controlehoras = () => {
         horasReais
       };
 
-      const response = await fetch('http://localhost:5000/api/registros', {
+      const response = await fetch(`${API_URL}/registros`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -123,7 +127,7 @@ const Controlehoras = () => {
       setMensagem({ texto: "Registro salvo com sucesso!", tipo: "sucesso" });
     } catch (error) {
       console.error('Erro ao salvar registro:', error);
-      setMensagem({ texto: "Erro ao salvar registro. Verifique se o servidor está rodando.", tipo: "erro" });
+      setMensagem({ texto: "Erro ao salvar registro. Verifique sua conexão.", tipo: "erro" });
     }
   };
 
