@@ -1,93 +1,73 @@
+const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
 require('dotenv').config();
 
+const app = express();
+
+// Middleware
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
+}));
+app.use(express.json());
+
 // Conexão com MongoDB
-let cachedDb = null;
+mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://diegocaninde84:TW9uBMhiFtOZUzjb@controlehorario.7vusm.mongodb.net/controle-horario?retryWrites=true&w=majority&appName=controlehorario', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    dbName: 'controle-horario'
+})
+.then(() => console.log('Conectado ao MongoDB com sucesso!'))
+.catch(err => console.error('Erro ao conectar ao MongoDB:', err));
 
-async function connectToDatabase() {
-    if (cachedDb) {
-        return cachedDb;
-    }
+// Importar modelo
+const Registro = require('./models/Registro');
 
-    try {
-        const db = await mongoose.connect(process.env.MONGODB_URI, {
-            serverSelectionTimeoutMS: 5000
-        });
-        console.log('Conectado ao MongoDB com sucesso');
-        cachedDb = db;
-        return db;
-    } catch (error) {
-        console.error('Erro ao conectar ao MongoDB:', error);
-        throw new Error('Não foi possível conectar ao banco de dados');
-    }
-}
+// Importar rotas
+const registrosRouter = require('./registros');
+const funcionariosRouter = require('./funcionarios');
 
-// Schema do Registro
-const registroSchema = new mongoose.Schema({
-    entrada: String,
-    inicioAlmoco: String,
-    fimAlmoco: String,
-    saidaPrevista: String,
-    saidaReal: String,
-    horasPrevistas: String,
-    horasReais: String,
-    data: { type: Date, default: Date.now }
+// Usar rotas
+app.use('/api/registros', registrosRouter);
+app.use('/api/funcionarios', funcionariosRouter);
+
+// Rota de teste
+app.get('/api/test', (req, res) => {
+    res.json({ message: 'API funcionando!' });
 });
 
-let Registro;
-try {
-    Registro = mongoose.model('Registro');
-} catch {
-    Registro = mongoose.model('Registro', registroSchema);
-}
-
-// Handler para as requisições
-module.exports = async (req, res) => {
-    // Configurar CORS
-    const allowedOrigins = [
-        'https://seu-projeto.vercel.app',
-        'http://localhost:3000',
-        'http://localhost:3001'
-    ];
-    
-    const origin = req.headers.origin;
-    if (allowedOrigins.includes(origin)) {
-        res.setHeader('Access-Control-Allow-Origin', origin);
-    }
-
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-
-    // Responder imediatamente para requisições OPTIONS
-    if (req.method === 'OPTIONS') {
-        res.status(200).end();
-        return;
-    }
-
+// Rotas
+app.get('/api/registros', async (req, res) => {
     try {
-        await connectToDatabase();
-
-        if (req.method === 'GET') {
-            const registros = await Registro.find().sort({ data: -1 });
-            return res.status(200).json(registros);
-        }
-
-        if (req.method === 'POST') {
-            if (!req.body) {
-                return res.status(400).json({ message: 'Dados do registro não fornecidos' });
-            }
-            const registro = new Registro(req.body);
-            await registro.save();
-            return res.status(201).json(registro);
-        }
-
-        return res.status(405).json({ message: 'Método não permitido' });
+        const registros = await Registro.find().sort({ data: -1 });
+        res.json(registros);
     } catch (error) {
-        console.error('Erro na API:', error);
-        return res.status(500).json({ 
-            message: 'Erro interno do servidor',
-            details: process.env.NODE_ENV === 'development' ? error.message : undefined
-        });
+        console.error('Erro ao buscar registros:', error);
+        res.status(500).json({ message: 'Erro ao buscar registros' });
     }
-}; 
+});
+
+app.post('/api/registros', async (req, res) => {
+    try {
+        const registro = new Registro(req.body);
+        await registro.save();
+        res.status(201).json(registro);
+    } catch (error) {
+        console.error('Erro ao salvar registro:', error);
+        res.status(400).json({ message: 'Erro ao salvar registro' });
+    }
+});
+
+// Tratamento de erros
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: 'Erro interno do servidor' });
+});
+
+// Iniciar servidor
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
+}); 

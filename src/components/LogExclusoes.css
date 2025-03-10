@@ -1,0 +1,152 @@
+.log-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.log-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 30px;
+}
+
+.log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #dc3545;
+}
+
+.log-header h2 {
+  color: #343a40;
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.log-info {
+  color: #6c757d;
+  font-size: 0.9rem;
+  padding: 5px 10px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.log-grid {
+  width: 100%;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.grid-header {
+  display: grid;
+  grid-template-columns: 1fr 2fr 2fr 3fr;
+  background-color: #f8f9fa;
+  font-weight: 600;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.grid-header .grid-cell {
+  color: #495057;
+  padding: 15px;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.grid-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr 2fr 3fr;
+  border-bottom: 1px solid #dee2e6;
+  transition: background-color 0.2s ease;
+}
+
+.grid-row:last-child {
+  border-bottom: none;
+}
+
+.grid-row:hover {
+  background-color: #f8f9fa;
+}
+
+.grid-cell {
+  padding: 12px 15px;
+  display: flex;
+  align-items: center;
+  line-height: 1.4;
+}
+
+.sem-registros {
+  text-align: center;
+  padding: 40px;
+  color: #6c757d;
+  font-style: italic;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin: 20px 0;
+  border: 1px dashed #dee2e6;
+}
+
+.mensagem {
+  padding: 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.mensagem.erro {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.mensagem.sucesso {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+@media (max-width: 768px) {
+  .log-card {
+    padding: 15px;
+  }
+
+  .grid-header {
+    display: none;
+  }
+
+  .grid-row {
+    grid-template-columns: 1fr;
+    padding: 15px;
+    gap: 10px;
+  }
+
+  .grid-cell {
+    padding: 8px 0;
+    position: relative;
+  }
+
+  .grid-cell::before {
+    content: attr(data-label);
+    font-weight: 600;
+    width: 120px;
+    min-width: 120px;
+    color: #495057;
+  }
+
+  .log-header {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .log-info {
+    width: 100%;
+    text-align: center;
+  }
+} 

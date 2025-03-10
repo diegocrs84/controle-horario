@@ -1,17 +1,41 @@
-import React from "react";
-import ControleHoras from "./Controlehoras";
-import logohorario from "./images/logohorario.jpg";
-import "./App.css";
+import React, { useState, useEffect } from 'react';
+import Controlehoras from './Controlehoras';
+import Login from './components/Login';
+import './App.css';
 
 function App() {
+  const [funcionario, setFuncionario] = useState(null);
+
+  useEffect(() => {
+    // Verifica se há um funcionário logado no localStorage
+    const funcionarioSalvo = localStorage.getItem('funcionario');
+    if (funcionarioSalvo) {
+      setFuncionario(JSON.parse(funcionarioSalvo));
+    }
+  }, []);
+
+  const handleLogin = (funcionarioData) => {
+    setFuncionario(funcionarioData);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('funcionario');
+    setFuncionario(null);
+  };
+
+  if (!funcionario) {
+    return <Login onLogin={handleLogin} />;
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logohorario} alt="Controle Horas" className="logo" />
-      </header>
-      <main>
-        <ControleHoras />
-      </main>
+    <div className="app">
+      <div className="header">
+        <span>Bem-vindo(a), {funcionario.nome}</span>
+        <button onClick={handleLogout} className="btn-logout">
+          Sair
+        </button>
+      </div>
+      <Controlehoras funcionario={funcionario} />
     </div>
   );
 }
