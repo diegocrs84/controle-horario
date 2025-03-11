@@ -17,12 +17,17 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
     try {
-        const { email } = req.body;
+        const { email, cargaHoraria } = req.body;
         
         // Verifica se já existe um funcionário com este email
         const funcionarioExistente = await Funcionario.findOne({ email });
         if (funcionarioExistente) {
             return res.status(400).json({ message: 'Email já cadastrado' });
+        }
+
+        // Valida a carga horária
+        if (cargaHoraria && (cargaHoraria < 1 || cargaHoraria > 24)) {
+            return res.status(400).json({ message: 'Carga horária deve estar entre 1 e 24 horas' });
         }
 
         const funcionario = new Funcionario(req.body);
@@ -70,7 +75,7 @@ router.post('/login', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { email, senha, ...dadosAtualizacao } = req.body;
+        const { email, senha, cargaHoraria, ...dadosAtualizacao } = req.body;
 
         // Se estiver atualizando o email, verifica se já existe
         if (email) {
@@ -87,6 +92,14 @@ router.put('/:id', async (req, res) => {
         // Se estiver atualizando a senha, faz o hash
         if (senha) {
             dadosAtualizacao.senha = await bcrypt.hash(senha, 10);
+        }
+
+        // Valida a carga horária
+        if (cargaHoraria) {
+            if (cargaHoraria < 1 || cargaHoraria > 24) {
+                return res.status(400).json({ message: 'Carga horária deve estar entre 1 e 24 horas' });
+            }
+            dadosAtualizacao.cargaHoraria = cargaHoraria;
         }
 
         const funcionario = await Funcionario.findByIdAndUpdate(

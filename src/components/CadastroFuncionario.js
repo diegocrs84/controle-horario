@@ -13,7 +13,8 @@ const CadastroFuncionario = ({ funcionario }) => {
     confirmarSenha: '',
     cargo: '',
     departamento: '',
-    isAdmin: false
+    isAdmin: false,
+    cargaHoraria: '8.5' // Valor padrão de 8.5 horas
   });
 
   const [mensagem, setMensagem] = useState({ texto: '', tipo: '' });
@@ -41,6 +42,12 @@ const CadastroFuncionario = ({ funcionario }) => {
 
     if (formData.senha.length < 6) {
       setMensagem({ texto: 'A senha deve ter no mínimo 6 caracteres', tipo: 'erro' });
+      return false;
+    }
+
+    const cargaHoraria = parseFloat(formData.cargaHoraria);
+    if (isNaN(cargaHoraria) || cargaHoraria < 1 || cargaHoraria > 24) {
+      setMensagem({ texto: 'A carga horária deve estar entre 1 e 24 horas', tipo: 'erro' });
       return false;
     }
 
@@ -78,7 +85,8 @@ const CadastroFuncionario = ({ funcionario }) => {
           email: formData.email,
           senha: formData.senha,
           cargo: formData.isAdmin ? 'Administrador' : formData.cargo,
-          departamento: formData.departamento
+          departamento: formData.departamento,
+          cargaHoraria: parseFloat(formData.cargaHoraria)
         }),
       });
 
@@ -100,7 +108,8 @@ const CadastroFuncionario = ({ funcionario }) => {
         confirmarSenha: '',
         cargo: '',
         departamento: '',
-        isAdmin: false
+        isAdmin: false,
+        cargaHoraria: '8.5'
       });
       setModoEdicao(false);
       setFuncionarioEditando(null);
@@ -184,6 +193,23 @@ const CadastroFuncionario = ({ funcionario }) => {
             </div>
           </div>
 
+          {funcionario?.cargo === 'Administrador' && (
+            <div className="form-group">
+              <label htmlFor="cargaHoraria">Carga Horária Diária (horas)*</label>
+              <input
+                type="number"
+                id="cargaHoraria"
+                name="cargaHoraria"
+                value={formData.cargaHoraria}
+                onChange={handleChange}
+                step="0.5"
+                min="1"
+                max="24"
+                placeholder="Ex: 8.5"
+              />
+            </div>
+          )}
+
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="cargo">Cargo*</label>
@@ -261,7 +287,8 @@ const CadastroFuncionario = ({ funcionario }) => {
                   confirmarSenha: '',
                   cargo: '',
                   departamento: '',
-                  isAdmin: false
+                  isAdmin: false,
+                  cargaHoraria: '8.5'
                 });
                 setModoEdicao(false);
                 setFuncionarioEditando(null);

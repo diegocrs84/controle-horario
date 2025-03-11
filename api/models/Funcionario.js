@@ -7,6 +7,7 @@ const funcionarioSchema = new mongoose.Schema({
     senha: { type: String, required: true },
     cargo: { type: String, required: true },
     departamento: { type: String, required: true },
+    cargaHoraria: { type: Number, default: 8.5 }, // Carga horária diária em horas
     dataCadastro: { type: Date, default: Date.now }
 });
 

@@ -80,8 +80,11 @@ const Controlehoras = ({ funcionario }) => {
       // Calcula o tempo antes do almoço
       const horasAnteAlmoco = calcularHoras(entrada, inicioAlmoco);
       
-      // Calcula o tempo necessário após o almoço para completar 8:30 horas (8.5 hours)
-      const horasRestantes = 8.5 - horasAnteAlmoco;
+      // Usa a carga horária do funcionário ou o valor padrão de 8.5
+      const cargaHorariaDiaria = funcionario?.cargaHoraria || 8.5;
+      
+      // Calcula o tempo necessário após o almoço para completar a carga horária
+      const horasRestantes = cargaHorariaDiaria - horasAnteAlmoco;
       
       // Calcula horário de saída previsto
       const [h, m] = fimAlmoco.split(':').map(Number);
@@ -102,7 +105,7 @@ const Controlehoras = ({ funcionario }) => {
         setHorasReais(horasReaisCalc.toFixed(2));
       }
     }
-  }, [entrada, inicioAlmoco, fimAlmoco, saidaReal, calcularHoras]);
+  }, [entrada, inicioAlmoco, fimAlmoco, saidaReal, calcularHoras, funcionario?.cargaHoraria]);
 
   useEffect(() => {
     calcularSaida();
@@ -175,8 +178,9 @@ const Controlehoras = ({ funcionario }) => {
           fimAlmoco,
           saidaPrevista,
           saidaReal,
-          horasPrevistas,
-          horasReais
+          horasPrevistas: horasPrevistas || '0.00',
+          horasReais: horasReais || '0.00',
+          data: new Date()
         })
       });
       
@@ -340,8 +344,11 @@ const Controlehoras = ({ funcionario }) => {
     const horasAnteAlmoco = calcularHoras(novoRegistro.entrada, novoRegistro.inicioAlmoco);
     const horasAposAlmoco = calcularHoras(novoRegistro.fimAlmoco, novoRegistro.saidaReal || novoRegistro.saidaPrevista);
     
+    // Usa a carga horária do funcionário ou o valor padrão de 8.5
+    const cargaHorariaDiaria = funcionario?.cargaHoraria || 8.5;
+    
     // Calcula saída prevista
-    const horasRestantes = 8.5 - horasAnteAlmoco;
+    const horasRestantes = cargaHorariaDiaria - horasAnteAlmoco;
     const [h, m] = novoRegistro.fimAlmoco.split(':').map(Number);
     const minutosTotal = h * 60 + m + horasRestantes * 60;
     const horasSaida = Math.floor(minutosTotal / 60);
